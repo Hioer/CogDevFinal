@@ -1,0 +1,78 @@
+---
+title: "Pizza"
+author: "Han"
+date: "4/24/2020"
+output: pdf_document
+---
+Input data
+```{r}
+library(readxl)
+D1 <- read_xlsx("Data.xlsx")
+D1 <- as.data.frame(D1)
+D1 <- D1[, -(9:10)]
+D1 <- D1[, -1]
+names(D1)[names(D1)=="edu experience"]="edu"
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+Methods centered (organized by educational experiences)
+```{r}
+D2 <- dplyr::select(D1, "gender", "age", "nationality", "method","major", "edu")
+D2$count <- 1
+D2$major <- as.character(D2$major)
+D3 <- D2 %>% group_by(method, edu) %>% summarise(sum(count))
+names(D3)[names(D3)=="sum(count)"]="count"
+p1 <- ggplot(D3, aes(x=method, y=count, fill=edu)) + geom_bar(stat="identity")
+p1
+
+D4 <- D2 %>% group_by(method, major) %>% summarise(sum(count))
+names(D4)[names(D4)=="sum(count)"]="count"
+p2 <- ggplot(D4, aes(x=method, y=count, fill=major)) + geom_bar(stat="identity")
+p2
+```
+
+Methods centered (organized by age)
+```{r}
+D5 <- D2
+D5$group <-  ifelse(D5$age<=12, 1, ifelse(D5$age <= 21, 2, ifelse(D5$age <50, 3, 4)))
+D5 <- D5 %>% group_by(method, group) %>% summarise(sum(count))
+names(D5)[names(D5)=="sum(count)"]="count"
+p3 <- ggplot(D5, aes(x=method, y=count, fill=group)) + geom_bar(stat="identity")
+p3
+```
+
+Answer centered (organized by educational experiences)
+```{r}
+D6 <- D1
+D6$count <- 1
+D6$correct <- ifelse(D6$answer==16, "Right", "Wrong")
+D7 <- D6 %>% group_by(correct, edu) %>% summarise(sum(count))
+names(D7)[names(D7)=="sum(count)"]="count"
+p4 <- ggplot(D7, aes(x=correct, y=count, fill=edu)) + geom_bar(stat="identity")
+p4
+```
+
+Answer centered (organized by age)
+```{r}
+D8 <- D6
+D8$group <-  ifelse(D8$age<=12, 1, ifelse(D8$age <= 21, 2, ifelse(D8$age <50, 3, 4)))
+D8 <- D8 %>% group_by(correct, group) %>% summarise(sum(count))
+names(D8)[names(D8)=="sum(count)"]="count"
+p5 <- ggplot(D8, aes(x=correct, y=count, fill=group)) + geom_bar(stat="identity")
+p5
+```
+
+Answer centered (organized by methods)
+```{r}
+D9 <- D6 %>% group_by(correct, method) %>% summarise(sum(count))
+names(D9)[names(D9)=="sum(count)"]="count"
+p6 <- ggplot(D9, aes(x=correct, y=count, fill=method)) + geom_bar(stat="identity")
+p6
+```
+
+
